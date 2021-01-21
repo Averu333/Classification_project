@@ -13,7 +13,7 @@ def args_parser():
     
     #Hyperparameters
     parser.add_argument('--use_wandb', action='store_true', help="Use wandb hyperparameter optimization.")    
-    parser.add_argument('--batch_size', type=int, default=10, help="Batch size for network testing and training.")
+    parser.add_argument('--batch_size', type=int, default=50, help="Batch size for network testing and training.")
     parser.add_argument('--learning_rate', type=float, default=0.001, help="Optimizer learning rate.")
     parser.add_argument('--weight_decay', type=float, default=0.000005, help="Optimizer weight decay.")
     
