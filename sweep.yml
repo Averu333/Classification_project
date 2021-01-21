@@ -1,0 +1,35 @@
+program: classifier.py
+command:
+  - ${env}
+  - python3
+  - ${program}
+  - ${args}
+  - --use_wandb
+  - --segmentation
+  - --gpu=-1
+method: bayes
+metric:
+  goal: maximize
+  name: eval_score
+parameters:
+  augmentation:
+    values: [0, 1]
+  base_dataset_size:
+    values: [2, 10, 30]
+  dataset_size:
+    values: [300, 900, 9000]
+  learning_rate:
+    distribution: uniform
+    min: 0.00005
+    max: 0.05
+  momentum:
+    distribution: uniform
+    min: 0.7
+    max: 0.95
+  weight_decay:
+    distribution: uniform
+    min: 1e-7
+    max: 1e-4
+early_terminate:
+  type: hyperband
+  min_iter: 2
