@@ -27,10 +27,8 @@ def train_one_epoch(model,
     loss_function = nn.CrossEntropyLoss()
     total_batches = len(data_loader)
     for batch_num, data in enumerate(data_loader):
-        # Usualy data formating is done in custom dataset object
-        # However this time I'm using the dataset from torchvision
-        # so I have to change the data format here
-        images = torch.stack([transforms.ToTensor()(i[0]).squeeze(0) for i in data])
+        # Format the data and set it to correct device
+        images = torch.stack([(i[0]) for i in data])
         images = images.to(device=device)
         targets = torch.stack([torch.tensor(i[1]) for i in data])
         targets = targets.to(device=device)

@@ -9,7 +9,14 @@ from utils.models import get_classifier_model
 from utils.myutils import save_weights, mycollate
 from utils.update import train_one_epoch
 from utils.evaluation import evaluate_model
+from utils.augmentation import generate_augmentation, Transfrom_using_aug
 
+def istrue(input):
+    if input == 1:
+        return True
+    else:
+        return False
+    
 if __name__ == "__main__":
     #Setting up argparser and hyperparameter optimization
     args = args_parser()
@@ -17,9 +24,23 @@ if __name__ == "__main__":
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
     if args.use_wandb: wandb.config.update(args)
     
+    #Generate augment used to transform training images
+    augment = generate_augmentation(istrue(args.aug_pad),
+                                istrue(args.aug_affine),
+                                istrue(args.aug_ch_suffle),
+                                istrue(args.aug_dropout),
+                                istrue(args.aug_AGN),
+                                istrue(args.aug_fliplr),
+                                istrue(args.aug_flipud),
+                                args.aug_percent)
+    
+    #Generate transform function using augmentation
+    trans = Transfrom_using_aug(augment)
+    
     #Setting up training and test datasets
     dataset = torchvision.datasets.CIFAR10(root='./data/train',
                                            train=True,
+                                           transform=trans,
                                            download=True)
     
     dataset_test = torchvision.datasets.CIFAR10(root='./data/test',
@@ -40,6 +61,7 @@ if __name__ == "__main__":
                                                    collate_fn=mycollate)
     
     #Get model and set to device
+    torch.hub.set_dir('./weights')
     model = get_classifier_model(args.model_name, num_classes=10, use_pretrained=True)
     model.to(args.device)
     
@@ -75,7 +97,7 @@ if __name__ == "__main__":
         save_weights(weights_folder='./weights',
                      model_weights=model.state_dict(),
                      eval_score=eval_score,
-                     model_name=args.model_name
+                     model_name=args.model_name,
                      use_wandb=args.use_wandb)
         #Log results and let the hyperparameter optimizer take care of early stops
         if args.use_wandb: wandb.log({'eval_score': eval_score, 'data_log': data_log})
