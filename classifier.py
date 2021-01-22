@@ -75,6 +75,7 @@ if __name__ == "__main__":
         save_weights(weights_folder='./weights',
                      model_weights=model.state_dict(),
                      eval_score=eval_score,
+                     model_name=args.model_name
                      use_wandb=args.use_wandb)
         #Log results and let the hyperparameter optimizer take care of early stops
         if args.use_wandb: wandb.log({'eval_score': eval_score, 'data_log': data_log})
