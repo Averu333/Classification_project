@@ -4,3 +4,5 @@ COPY requirements.txt .
 RUN apt update && apt install python3-pip -y
 RUN apt-get install cython3
 RUN pip3 install -r requirements.txt
+RUN apt update && apt install -y libsm6 libxext6
+RUN apt-get install -y libxrender-dev
