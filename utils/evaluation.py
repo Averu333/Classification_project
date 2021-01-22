@@ -22,10 +22,8 @@ def evaluate_model(model, data_loader_test, device):
     data_log = np.zeros((10,10), dtype=np.int32)
     matrix_labels = [i for i in range(10)]
     for batch_num, data in enumerate(data_loader_test):
-        # Usualy data formating is done in custom dataset object
-        # However this time I'm using the dataset from torchvision
-        # so I have to change the data format here
-        images = torch.stack([transforms.ToTensor()(i[0]).squeeze(0) for i in data])
+        #Correct input data format and set device
+        images = torch.stack([i[0]for i in data])
         images = images.to(device=device)
         targets = np.array([i[1] for i in data])
         

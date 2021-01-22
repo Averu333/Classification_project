@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torchvision
 import wandb
+from torchvision import transforms
 
 #Local functions
 from utils.options import args_parser
@@ -35,16 +36,20 @@ if __name__ == "__main__":
                                 args.aug_percent)
     
     #Generate transform function using augmentation
-    trans = Transfrom_using_aug(augment)
+    trans_train = Transfrom_using_aug(augment)
+    trans_test = transforms.Compose([transforms.ToTensor(),
+                                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                         std=[0.229, 0.224, 0.225])])
     
     #Setting up training and test datasets
     dataset = torchvision.datasets.CIFAR10(root='./data/train',
                                            train=True,
-                                           transform=trans,
+                                           transform=trans_train,
                                            download=True)
     
     dataset_test = torchvision.datasets.CIFAR10(root='./data/test',
                                                 train=False,
+                                                transform=trans_test,
                                                 download=True)
     
     #Setting up dataloaders for datasets

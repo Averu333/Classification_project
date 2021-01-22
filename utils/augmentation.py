@@ -1,5 +1,5 @@
 import imgaug as ia
-from torchvision.transforms import ToTensor
+from torchvision import transforms
 from imgaug import augmenters as iaa
 import numpy as np
 import torch
@@ -61,6 +61,8 @@ class Transfrom_using_aug(object):
     def __call__(self, image):
         image = np.array(image)
         image = self.augment(image=image)
-        image = ToTensor()(image)
+        image = transforms.ToTensor()(image)
+        image = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]).forward(image)
         return image
     
