@@ -71,8 +71,6 @@ if __name__ == "__main__":
                                               data_loader_test,
                                               args.device)
         print("Epoch {}, evaluation score {}".format(epoch, eval_score))
-        if epoch == 3:
-            eval_score = 1.0
         #Check if network is best and save weights
         save_weights(weights_folder='./weights',
                      model_weights=model.state_dict(),
@@ -80,6 +78,4 @@ if __name__ == "__main__":
                      use_wandb=args.use_wandb)
         #Log results and let the hyperparameter optimizer take care of early stops
         if args.use_wandb: wandb.log({'eval_score': eval_score, 'data_log': data_log})
-        if epoch == 3:
-            exit()
             
