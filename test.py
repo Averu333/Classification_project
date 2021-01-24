@@ -4,9 +4,10 @@ import PIL
 import numpy as np
 
 from utils.myutils import mycollate, save_weights
-from utils.models import get_classifier_model
+from utils.models import get_classifier_model, mymodel
 from utils.evaluation import evaluate_model
 from utils.augmentation import generate_augmentation, Transfrom_using_aug
+
 
 def test_evaluation():
     device = 'cpu'
@@ -70,8 +71,15 @@ def test_transform_using_aug():
     # image.save('./testimage.jpg')
     print('end')
 
+def test_mymodel():
+    model = mymodel(10)
+    image = torch.zeros((2, 3, 224,224))
+    prediction = model(image)
+    print('end')
+
 if __name__ == "__main__":
     # test_evaluation()
     # test_save_weights()
     # test_generate_augmentation()
-    test_transform_using_aug()
+    # test_transform_using_aug()
+    test_mymodel()
