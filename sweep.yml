@@ -5,27 +5,36 @@ command:
   - ${program}
   - ${args}
   - --use_wandb
-  - --segmentation
-  - --gpu=-1
+  - --gpu=0
 method: bayes
 metric:
   goal: maximize
   name: eval_score
 parameters:
-  augmentation:
+  aug_pad:
     values: [0, 1]
-  base_dataset_size:
-    values: [2, 10, 30]
-  dataset_size:
-    values: [300, 900, 9000]
+  aug_affine:
+    values: [0, 1]
+  aug_ch_suffle:
+    values: [0, 1]
+  aug_dropout:
+    values: [0, 1]
+  aug_AGN:
+    values: [0, 1]
+  aug_fliplr:
+    values: [0, 1]
+  aug_flipud:
+    values: [0, 1]
+  aug_percent:
+    distribution: uniform
+    min: 0.0
+    max: 1.0
+  model_name:
+    values: ['resnet', 'alexnet', 'vgg', 'squeezenet', 'densenet', 'mymodel']
   learning_rate:
     distribution: uniform
     min: 0.00005
     max: 0.05
-  momentum:
-    distribution: uniform
-    min: 0.7
-    max: 0.95
   weight_decay:
     distribution: uniform
     min: 1e-7
