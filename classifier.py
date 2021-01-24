@@ -21,7 +21,7 @@ def istrue(input):
 if __name__ == "__main__":
     #Setting up argparser and hyperparameter optimization
     args = args_parser()
-    if args.use_wandb: wandb.init()
+    if args.use_wandb: wandb.init(project="cvproject")
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
     if args.use_wandb: wandb.config.update(args)
     
@@ -37,7 +37,8 @@ if __name__ == "__main__":
     
     #Generate transform function using augmentation
     trans_train = Transfrom_using_aug(augment)
-    trans_test = transforms.Compose([transforms.ToTensor(),
+    trans_test = transforms.Compose([transforms.Resize(224),
+                                    transforms.ToTensor(),
                                     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                          std=[0.229, 0.224, 0.225])])
     
@@ -56,13 +57,13 @@ if __name__ == "__main__":
     data_loader = torch.utils.data.DataLoader(dataset,
                                               batch_size=args.batch_size,
                                               shuffle=True,
-                                              num_workers=0,
+                                              num_workers=4,
                                               collate_fn=mycollate)
     
     data_loader_test = torch.utils.data.DataLoader(dataset_test,
                                                    batch_size=args.batch_size,
                                                    shuffle=False,
-                                                   num_workers=0,
+                                                   num_workers=4,
                                                    collate_fn=mycollate)
     
     #Get model and set to device

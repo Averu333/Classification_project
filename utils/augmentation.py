@@ -32,6 +32,7 @@ def generate_augmentation(aug_pad,
     '''
     
     #Create all augments
+    resize = iaa.Resize(224)
     pad = iaa.Pad(px=(0, 4))
     affine = iaa.Affine(rotate=(-10, 10))
     ch_suffle = iaa.ChannelShuffle(0.35)
@@ -46,7 +47,8 @@ def generate_augmentation(aug_pad,
     aug_list = [aug_list[i] for i in np.where(use_aug_list)[0]]
     
     #Create the augment and use aug_percent to determine how oftern augments are used
-    augment = iaa.Sequential([iaa.Sometimes(aug_percent, 
+    augment = iaa.Sequential([resize,
+                            iaa.Sometimes(aug_percent, 
                             iaa.Sequential(aug_list))])
     return augment
 
