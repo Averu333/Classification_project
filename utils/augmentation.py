@@ -45,7 +45,6 @@ def generate_augmentation(aug_pad,
     aug_list = [pad, affine, ch_suffle, dropout, AGN, flip_lr, flip_ud]
     use_aug_list = [aug_pad, aug_affine, aug_ch_suffle, aug_dropout, aug_AGN, aug_fliplr, aug_flipud]
     aug_list = [aug_list[i] for i in np.where(use_aug_list)[0]]
-    
     #Create the augment and use aug_percent to determine how oftern augments are used
     augment = iaa.Sequential([resize,
                             iaa.Sometimes(aug_percent, 
@@ -63,7 +62,7 @@ class Transfrom_using_aug(object):
     def __call__(self, image):
         image = np.array(image)
         image = self.augment(image=image)
-        image = transforms.ToTensor()(image)
+        image = transforms.ToTensor()(image.copy())
         image = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225]).forward(image)
         return image
