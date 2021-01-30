@@ -8,7 +8,7 @@ def args_parser():
     parser.add_argument('--model_name', type=str, default='resnet', help='What model to use. Options: resnet')
     
     #Training arguments
-    parser.add_argument('--num_epochs', type=int, default=100, help="Number of epochs that the model will train.")
+    parser.add_argument('--num_epochs', type=int, default=16, help="Number of epochs that the model will train.")
     parser.add_argument('--train_print_freq', type=int, default=100, help="Printing frequency while training, number of batches before each print.")   
     
     #Hyperparameters
