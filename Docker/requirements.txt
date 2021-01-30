@@ -1,7 +1,7 @@
 numpy==1.19.3
 torch==1.7.0
 torchvision==0.8.1
-wandb==0.10.10
+wandb==0.10.15
 pillow==6.1.0
 opencv-python==4.2.0.34
 imgaug==0.4.0
