@@ -24,7 +24,7 @@ if __name__ == "__main__":
     if args.use_wandb: wandb.init(project="cvproject")
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
     if args.use_wandb: wandb.config.update(args)
-    
+
     #Generate augment used to transform training images
     augment = generate_augmentation(istrue(args.aug_pad),
                                 istrue(args.aug_affine),
@@ -80,8 +80,13 @@ if __name__ == "__main__":
                                  eps=1e-08,
                                  weight_decay=args.weight_decay)
     
+    # optimizer = torch.optim.SGD(params,
+    #                             lr=0.00005,
+    #                             momentum=0.9,
+    #                             weight_decay=0.000005)
+    
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                step_size=3,
+                                                step_size=4,
                                                 gamma=0.1)
     
     for epoch in range(args.num_epochs):
@@ -95,7 +100,7 @@ if __name__ == "__main__":
         #Step lr scheduler
         lr_scheduler.step()
         #Evaluate results to get evaluation score and a data_log that logs all classification results
-        eval_score, data_log = evaluate_model(model,
+        eval_score, predictions, ground_truth, class_names = evaluate_model(model,
                                               data_loader_test,
                                               args.device)
         print("Epoch {}, evaluation score {}".format(epoch, eval_score))
@@ -106,5 +111,8 @@ if __name__ == "__main__":
                      model_name=args.model_name,
                      use_wandb=args.use_wandb)
         #Log results and let the hyperparameter optimizer take care of early stops
-        if args.use_wandb: wandb.log({'eval_score': eval_score, 'data_log': data_log})
+        if args.use_wandb: wandb.log({'eval_score': eval_score,
+                                      'conf_mat': wandb.plot.confusion_matrix(
+                                          preds=predictions, y_true=ground_truth, class_names=class_names
+                                      )})
             
