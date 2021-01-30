@@ -2,6 +2,9 @@ from torchvision import transforms
 import torch
 from torch import nn
 import numpy as np
+import time
+import datetime
+import math
 
 def train_one_epoch(model,
                     optimizer,
@@ -26,6 +29,7 @@ def train_one_epoch(model,
     model.train()
     loss_function = nn.CrossEntropyLoss()
     total_batches = len(data_loader)
+    t0 = time.time()
     for batch_num, data in enumerate(data_loader):
         # Format the data and set it to correct device
         images = torch.stack([(i[0]) for i in data])
@@ -37,6 +41,12 @@ def train_one_epoch(model,
         predictions = model(images)
         loss = loss_function(predictions, targets)
         
+        # if loss nan exit
+        if not math.isfinite(loss):
+            if args.use_wandb: wandb.log({'eval_score': 0})
+            print("Loss is {}, stopping training".format(loss))
+            exit(1)
+        
         # backwards
         optimizer.zero_grad()
         loss.backward()
@@ -45,11 +55,14 @@ def train_one_epoch(model,
         # print verbdose if needed
         if train_print_freq:
             if batch_num % train_print_freq == 0:
-                print("Epoch {}, batch {}/{}, loss {}, learning_rate {}".format(epoch,
+                eta = ((time.time() - t0) / (batch_num+1)) * (total_batches-batch_num-1)
+                eta = int(eta)
+                eta = str(datetime.timedelta(seconds=eta))
+                print("Epoch {}, batch {}/{}, loss {}, learning_rate {}, eta {}".format(epoch,
                                                                                 batch_num,
                                                                                 total_batches,
                                                                                 loss,
-                                                                                optimizer.param_groups[0]["lr"]))
-        
+                                                                                optimizer.param_groups[0]["lr"],
+                                                                                eta)) 
     return model
     
