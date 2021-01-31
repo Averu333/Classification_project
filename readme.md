@@ -26,7 +26,7 @@ This project shows skills in following areas:
 Pytorch, Docker, Git, file mangaement, commentting, hyperparamenter optimization, dataset management and transformation, knowledge in common neural networks and creation of neural networks and lastly correct model training, testing and early stoping practices.
 
 ## Hyperparameter optimization
-Hyperparameter optimization was done using wandb and xxxx runs were done. I used bayesian optmization with hyperband early stops.
+Hyperparameter optimization was done using wandb and 6 runs were done. I used bayesian optmization with hyperband early stops.
 
 Hyperparameters used were:
 - Base Network
