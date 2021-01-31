@@ -21,8 +21,7 @@ def evaluate_model(model, data_loader_test, device):
     model.to(device=device)
     predictions, ground_truth = [], []
     correct = 0
-    # data_log = np.zeros((10,10), dtype=np.int32)
-    # matrix_labels = [i for i in range(10)]
+
     for batch_num, data in enumerate(data_loader_test):
         #Correct input data format and set device
         images = torch.stack([i[0]for i in data])
@@ -31,18 +30,20 @@ def evaluate_model(model, data_loader_test, device):
         
         with torch.no_grad():
             prediction = model(images)
-        #Choose max prediction to represent class and compare to target
+        #Choose max prediction to represent class
         prediction = prediction.detach().cpu().numpy()
         prediction = np.argmax(prediction, axis=1)
+        
+        #Add preditcions and ground truths to the result list
         predictions += list(prediction)
         ground_truth += list(targets)
-        # conf = confusion_matrix(prediction, targets, labels=matrix_labels)  
-        # data_log += conf
     
+    #Compare gt and pred lists and calculate number
+    #of correct predictions
     for i in range(len(predictions)):
         if predictions[i] == ground_truth[i]:
             correct += 1
     score = correct / len(ground_truth)
-    # score = np.sum(np.diagonal(data_log))/np.sum(data_log)
+
     class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     return score, predictions, ground_truth, class_names

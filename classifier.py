@@ -71,7 +71,7 @@ if __name__ == "__main__":
     model = get_classifier_model(args.model_name, num_classes=10, use_pretrained=True)
     model.to(args.device)
     
-    #Create the optimizer and 
+    #Create the optimizer
     params = [p for p in model.parameters() if p.requires_grad]
     
     optimizer = torch.optim.Adam(params,
@@ -80,11 +80,7 @@ if __name__ == "__main__":
                                  eps=1e-08,
                                  weight_decay=args.weight_decay)
     
-    # optimizer = torch.optim.SGD(params,
-    #                             lr=0.00005,
-    #                             momentum=0.9,
-    #                             weight_decay=0.000005)
-    
+    #Create lr scheduler
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                 step_size=4,
                                                 gamma=0.1)
