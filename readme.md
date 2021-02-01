@@ -1,4 +1,4 @@
-Updated: 31.01.2021
+Hyperparameter optimization in progress. Updated: 31.01.2021
  
 # Neural network training, using CIFAR-10 dataset
 A showcase project for my coding practices and use of deep learning.
