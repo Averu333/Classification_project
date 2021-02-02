@@ -2,17 +2,18 @@ import torch
 import torchvision
 import PIL
 import numpy as np
+from torchvision import transforms
 
 from utils.myutils import mycollate, save_weights
 from utils.models import get_classifier_model, mymodel
-from utils.evaluation import evaluate_model
 from utils.augmentation import generate_augmentation, Transfrom_using_aug
+from utils.datasets import MyDataset
 
 
 def test_evaluation():
     device = 'cpu'
     model_path = './weights/1.0_'
-    
+    torch.hub.set_dir('./weights')
     model = get_classifier_model('resnet', num_classes=10, use_pretrained=True)
     model.to(device)
     model.load_state_dict(torch.load(model_path))
@@ -42,13 +43,13 @@ def test_save_weights():
                  use_wandb=False)
 
 def test_generate_augmentation():
-    aug_pad = True
-    aug_affine = True
+    aug_pad = False
+    aug_affine = False
     aug_ch_suffle = False
     aug_dropout = False
     aug_AGN = False
     aug_fliplr = False
-    aug_flipud = False
+    aug_flipud = True
     aug_percent = 0.0
     return generate_augmentation(aug_pad,
                                 aug_affine,
@@ -76,10 +77,23 @@ def test_mymodel():
     image = torch.zeros((2, 3, 224,224))
     prediction = model(image)
     print('end')
-
+ 
+def test_mydataset():
+    dataset = torchvision.datasets.CIFAR10(root='./data/train',
+                                        train=True,
+                                        download=True)   
+    trans_val = transforms.Compose([transforms.Resize(224),
+                                    transforms.ToTensor(),
+                                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                         std=[0.229, 0.224, 0.225])])
+    dataset_val = MyDataset(dataset, trans_val)
+    print(dataset_val.__getitem__(0))
+    print('test_mydataset end')
+    
 if __name__ == "__main__":
     # test_evaluation()
     # test_save_weights()
     # test_generate_augmentation()
     # test_transform_using_aug()
-    test_mymodel()
+    # test_mymodel()
+    test_mydataset()
