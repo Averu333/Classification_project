@@ -4,11 +4,13 @@ def args_parser():
     parser = argparse.ArgumentParser()
     
     #Network arguments
-    parser.add_argument('--gpu', type=int, default=0, help='If device is -1 uses cpu, else uses cuda of device argument')
-    parser.add_argument('--model_name', type=str, default='resnet', help='What model to use. Options: resnet')
+    parser.add_argument('--gpu', type=int, default=-1, help='If device is -1 uses cpu, else uses cuda of device argument')
+    parser.add_argument('--model_name', type=str, default='squeezenet', help='What model to use. Options: resnet')
+    parser.add_argument('--weights_folder', type=str, default='./weights', help="Path to weights folder.")
+    parser.add_argument('--train_full', action='store_true', help="If used does full training instead of hyperparameter search")
     
     #Training arguments
-    parser.add_argument('--num_epochs', type=int, default=16, help="Number of epochs that the model will train.")
+    parser.add_argument('--num_epochs', type=int, default=12, help="Number of epochs that the model will train.")
     parser.add_argument('--train_print_freq', type=int, default=100, help="Printing frequency while training, number of batches before each print.")   
     
     #Hyperparameters
@@ -26,6 +28,9 @@ def args_parser():
     parser.add_argument('--aug_fliplr', type=int, default=0, help="0 or 1. With 1 augments left-right flip to training images.")
     parser.add_argument('--aug_flipud', type=int, default=0, help="0 or 1. With 1 augments up-down flip to training images.")
     parser.add_argument('--aug_percent', type=float, default=0.0, help="A value between 0 and 1. Value determines how often chosen augmenters are applied.")
+    
+    #Testing arguments
+    parser.add_argument('--testmodel_path', type=str, default='', help="Set path to the model to test.")
     
     args = parser.parse_args()
     return args
