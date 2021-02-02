@@ -8,7 +8,7 @@ def turn_grad_off(model, activate=True):
         for param in model.parameters():
             param.requires_grad = False
 
-def get_classifier_model(model_name, num_classes, use_pretrained=True):
+def get_classifier_model(model_name, num_classes, use_pretrained=True, train_last_layer_only=False):
     '''
     A function to construct network model.
     Args:
@@ -22,31 +22,31 @@ def get_classifier_model(model_name, num_classes, use_pretrained=True):
     
     if model_name == 'resnet':
         model = models.resnet50(pretrained=use_pretrained)
-        turn_grad_off(model)
+        turn_grad_off(model, train_last_layer_only)
         num_features = model.fc.in_features
         model.fc = torch.nn.Linear(num_features, num_classes)
 
     elif model_name == 'alexnet':
         model = models.alexnet(pretrained=use_pretrained)
-        turn_grad_off(model)
+        turn_grad_off(model, train_last_layer_only)
         num_features = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_features, num_classes)
 
     elif model_name == 'vgg':
         model = models.vgg11_bn(pretrained=use_pretrained)
-        turn_grad_off(model)
+        turn_grad_off(model, train_last_layer_only)
         num_features = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_features, num_classes)
 
     elif model_name == 'squeezenet':
         model = models.squeezenet1_0(pretrained=use_pretrained)
-        turn_grad_off(model)
+        turn_grad_off(model, train_last_layer_only)
         model.classifier[1] = nn.Conv2d(512, num_classes, kernel_size=(1,1), stride=(1,1))
         model.num_classes = num_classes
 
     elif model_name == 'densenet':
         model = models.densenet121(pretrained=use_pretrained)
-        turn_grad_off(model)
+        turn_grad_off(model, train_last_layer_only)
         num_features = model.classifier.in_features
         model.classifier = nn.Linear(num_features, num_classes)
 
@@ -54,7 +54,7 @@ def get_classifier_model(model_name, num_classes, use_pretrained=True):
         model = mymodel(num_classes)
 
     else:
-        print("Invalid model name, exiting...")
+        print("Invalid model name. Exiting.")
         exit()
     
     return model
