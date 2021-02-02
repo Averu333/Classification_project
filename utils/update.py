@@ -11,7 +11,8 @@ def train_one_epoch(model,
                     data_loader,
                     device,
                     epoch,
-                    train_print_freq=None):
+                    train_print_freq=None,
+                    use_wandb=False):
     '''
     Trains the model for one epoch.
     Args:
@@ -43,7 +44,7 @@ def train_one_epoch(model,
         
         # if loss nan exit
         if not math.isfinite(loss):
-            if args.use_wandb: wandb.log({'eval_score': 0})
+            if use_wandb: wandb.log({'eval_score': 0})
             print("Loss is {}, stopping training".format(loss))
             exit(1)
         
@@ -64,5 +65,32 @@ def train_one_epoch(model,
                                                                                 loss,
                                                                                 optimizer.param_groups[0]["lr"],
                                                                                 eta)) 
-    return model
     
+def validate_model(model, data_loader, device):
+    '''
+    A function to calculate the validation loss of model.
+    The validation loss is used in hyperparameter search.
+    Args:
+        model (torch model): model to validate
+        data_loader (torch dataloader): dataloader containing the validation set
+        device (str): device to use
+    Retrurns:
+        val_loss (float): validation_loss value of the model
+    '''
+    model.eval()
+    loss_function = nn.CrossEntropyLoss()
+    total_batches = len(data_loader)
+    loss = 0
+    for batch_num, data in enumerate(data_loader):
+        # Format the data and set it to correct device
+        images = torch.stack([(i[0]) for i in data])
+        images = images.to(device=device)
+        targets = torch.stack([torch.tensor(i[1]) for i in data])
+        targets = targets.to(device=device)
+        
+        # prediction and loss calculation
+        with torch.no_grad():
+            predictions = model(images)
+        loss += loss_function(predictions, targets)
+        
+    return loss / len(data_loader.dataset)

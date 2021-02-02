@@ -8,9 +8,10 @@ from torchvision import transforms
 from utils.options import args_parser
 from utils.models import get_classifier_model
 from utils.myutils import save_weights, mycollate
-from utils.update import train_one_epoch
+from utils.update import train_one_epoch, validate_model
 from utils.evaluation import evaluate_model
 from utils.augmentation import generate_augmentation, Transfrom_using_aug
+from utils.datasets import MyDataset
 
 def istrue(input):
     if input == 1:
@@ -21,10 +22,10 @@ def istrue(input):
 if __name__ == "__main__":
     #Setting up argparser and hyperparameter optimization
     args = args_parser()
-    if args.use_wandb: wandb.init(project="cvproject")
+    if args.use_wandb: wandb.init()
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
     if args.use_wandb: wandb.config.update(args)
-
+    
     #Generate augment used to transform training images
     augment = generate_augmentation(istrue(args.aug_pad),
                                 istrue(args.aug_affine),
@@ -37,38 +38,54 @@ if __name__ == "__main__":
     
     #Generate transform function using augmentation
     trans_train = Transfrom_using_aug(augment)
-    trans_test = transforms.Compose([transforms.Resize(224),
+    trans_val = transforms.Compose([transforms.Resize(224),
                                     transforms.ToTensor(),
                                     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                          std=[0.229, 0.224, 0.225])])
     
-    #Setting up training and test datasets
+    #Setting up dataset
     dataset = torchvision.datasets.CIFAR10(root='./data/train',
                                            train=True,
-                                           transform=trans_train,
                                            download=True)
+
+    if not args.train_full:
+        #Splitting up dataset to test and validation set
+        #Note: k-fold cross validation could also be implemented
+        #However it requires k times more computation which is
+        #unesessary for this small example project
+        indices = np.arange(len(dataset))
+        np.random.seed(1758935)
+        np.random.shuffle(indices)
+        split_index = int(len(dataset) * 0.8)
+        dataset_train = torch.utils.data.Subset(dataset, indices[:split_index])
+        dataset_val = torch.utils.data.Subset(dataset, indices[split_index:])
+    else:
+        dataset_train = dataset
+        
+    #Add transformations with use of my own dataset object
+    dataset_train = MyDataset(dataset_train, trans_train)
+    if not args.train_full:
+        dataset_val = MyDataset(dataset_val, trans_val)
     
-    dataset_test = torchvision.datasets.CIFAR10(root='./data/test',
-                                                train=False,
-                                                transform=trans_test,
-                                                download=True)
-    
-    #Setting up dataloaders for datasets
-    data_loader = torch.utils.data.DataLoader(dataset,
-                                              batch_size=args.batch_size,
-                                              shuffle=True,
-                                              num_workers=4,
-                                              collate_fn=mycollate)
-    
-    data_loader_test = torch.utils.data.DataLoader(dataset_test,
-                                                   batch_size=args.batch_size,
-                                                   shuffle=False,
-                                                   num_workers=4,
-                                                   collate_fn=mycollate)
+    #Put subsets to dataloaders
+    data_loader_train = torch.utils.data.DataLoader(dataset_train,
+                                            batch_size=args.batch_size,
+                                            shuffle=True,
+                                            num_workers=4,
+                                            collate_fn=mycollate)
+    if not args.train_full:
+        data_loader_val = torch.utils.data.DataLoader(dataset_val,
+                                                    batch_size=args.batch_size,
+                                                    shuffle=False,
+                                                    num_workers=4,
+                                                    collate_fn=mycollate)
     
     #Get model and set to device
-    torch.hub.set_dir('./weights')
-    model = get_classifier_model(args.model_name, num_classes=10, use_pretrained=True)
+    torch.hub.set_dir(args.weights_folder)
+    model = get_classifier_model(args.model_name,
+                                 num_classes=10,
+                                 use_pretrained=True,
+                                 train_last_layer_only=True)
     model.to(args.device)
     
     #Create the optimizer
@@ -81,34 +98,35 @@ if __name__ == "__main__":
                                  weight_decay=args.weight_decay)
     
     #Create lr scheduler
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                step_size=4,
-                                                gamma=0.1)
+    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+                                                              factor=0.1,
+                                                              patience=2,
+                                                              threshold=0.01)
     
     for epoch in range(args.num_epochs):
         #train one epoch
         train_one_epoch(model,
                         optimizer,
-                        data_loader,
+                        data_loader_train,
                         args.device,
                         epoch,
-                        train_print_freq=args.train_print_freq)
-        #Step lr scheduler
-        lr_scheduler.step()
-        #Evaluate results to get evaluation score and a data_log that logs all classification results
-        eval_score, predictions, ground_truth, class_names = evaluate_model(model,
-                                              data_loader_test,
-                                              args.device)
-        print("Epoch {}, evaluation score {}".format(epoch, eval_score))
-        #Check if network is best and save weights
-        save_weights(weights_folder='./weights',
-                     model_weights=model.state_dict(),
-                     eval_score=eval_score,
-                     model_name=args.model_name,
-                     use_wandb=args.use_wandb)
-        #Log results and let the hyperparameter optimizer take care of early stops
-        if args.use_wandb: wandb.log({'eval_score': eval_score,
-                                      'conf_mat': wandb.plot.confusion_matrix(
-                                          preds=predictions, y_true=ground_truth, class_names=class_names
-                                      )})
+                        train_print_freq=args.train_print_freq,
+                        use_wandb=args.use_wandb)
+        
+        if not args.train_full:
+            val_loss = validate_model(model,
+                                    data_loader_val,
+                                    args.device)
             
+            #Step lr scheduler
+            lr_scheduler.step(val_loss)
+            
+            print("Epoch {}, validation loss {}".format(epoch, val_loss))
+            #Log results and let the hyperparameter optimizer take care of early stops
+            if args.use_wandb: wandb.log({'val_loss': val_loss})
+    
+    #Save fully trained network        
+    if args.train_full:        
+        save_weights(weights_folder=args.weights_folder,
+                    model_weights=model.state_dict(),
+                    model_name=args.model_name)
