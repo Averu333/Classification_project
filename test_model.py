@@ -49,7 +49,8 @@ if __name__ == "__main__":
     #Create and save confusion matrix
     conf_mat = confusion_matrix(ground_truth, predictions, normalize='true')
     df_cm = pd.DataFrame(conf_mat, index = class_names, columns = class_names)
-    conf_mat_fig = sn.heatmap(df_cm, annot=True, xticklabels=class_names, yticklabels=class_names, cmap="Blues", cbar=False) #"Blues", 
+    plt.figure(figsize=(10,7))
+    conf_mat_fig = sn.heatmap(df_cm, annot=True, xticklabels=class_names, yticklabels=class_names, cmap="Blues", cbar=False)
     conf_mat_fig.figure.savefig("./confusion_matrix.png")
     print('end')
     

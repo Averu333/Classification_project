@@ -17,7 +17,7 @@ With my trained neural network I was able to achieve 71.09% accuracy.
 Below the image of resulting confusion matrix. Correct answers are shown on diagonal.
  
 <p aling='center'>
-<img width="1000" height="500" src="readme_images/conf_matrix.png">
+<img width="1000" height="700" src="readme_images/conf_matrix.png">
 </p>
  
 ## Main features of this project
