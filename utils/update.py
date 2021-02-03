@@ -92,5 +92,6 @@ def validate_model(model, data_loader, device):
         with torch.no_grad():
             predictions = model(images)
         loss += loss_function(predictions, targets)
-        
-    return loss / len(data_loader.dataset)
+    
+    #Return validation loss   
+    return loss / len(data_loader)
