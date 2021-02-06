@@ -3,6 +3,9 @@ import torchvision
 import PIL
 import numpy as np
 from torchvision import transforms
+import seaborn as sn
+import pandas as pd
+import matplotlib.pyplot as plt
 
 from utils.myutils import mycollate, save_weights
 from utils.models import get_classifier_model, mymodel
@@ -89,11 +92,24 @@ def test_mydataset():
     dataset_val = MyDataset(dataset, trans_val)
     print(dataset_val.__getitem__(0))
     print('test_mydataset end')
-    
+
+def test_confmatrix():
+    data = np.random.rand(4, 4)
+    class_names = ['A', 'B', 'C', 'D']
+    df_cm = pd.DataFrame(data)
+    fig, ax = plt.subplots(figsize=(10,7))
+    conf_mat_fig = sn.heatmap(df_cm, annot=True, xticklabels=class_names, yticklabels=class_names, cmap="Blues", cbar=False)
+    plt.xlabel('Prediction', fontsize=18)
+    ax.xaxis.set_label_position('top') 
+    plt.ylabel('Actual', fontsize=18)
+    ax.xaxis.tick_top()
+    conf_mat_fig.figure.savefig("./conf_mat_test.png")
+
 if __name__ == "__main__":
     # test_evaluation()
     # test_save_weights()
     # test_generate_augmentation()
     # test_transform_using_aug()
     # test_mymodel()
-    test_mydataset()
+    # test_mydataset()
+    test_confmatrix()
