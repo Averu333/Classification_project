@@ -43,8 +43,7 @@ def train_one_epoch(model,
         loss = loss_function(predictions, targets)
         
         # if loss nan exit
-        if not math.isfinite(loss):
-            if use_wandb: wandb.log({'eval_score': 0})
+        if not math.isfinite(loss.item()):
             print("Loss is {}, stopping training".format(loss))
             exit(1)
         
@@ -91,7 +90,7 @@ def validate_model(model, data_loader, device):
         # prediction and loss calculation
         with torch.no_grad():
             predictions = model(images)
-        loss += loss_function(predictions, targets)
+        loss += loss_function(predictions, targets).item()
     
     #Return validation loss   
     return loss / len(data_loader)
