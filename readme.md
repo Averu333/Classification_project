@@ -1,4 +1,4 @@
-Hyperparameter optimization in progress. Updated: 31.01.2021
+Updated: 06.02.2021
  
 # Neural network training, using CIFAR-10 dataset
 A showcase project for my coding practices and use of deep learning.
@@ -12,7 +12,7 @@ Below are 10 images visualized from each class:
 </p>
  
 ## Results
-With my trained neural network I was able to achieve 71.09% accuracy.
+With my trained neural network I was able to achieve 91.48% accuracy.
  
 Below the image of resulting confusion matrix. Correct answers are shown on diagonal.
  
@@ -26,7 +26,7 @@ This project shows skills in following areas:
 Pytorch, Docker, Git, file management, commenting, hyperparameter optimization, dataset management and transformation, knowledge in common neural networks and creation of neural networks and lastly correct model training, testing and early stopping practices.
  
 ## Hyperparameter optimization
-Hyperparameter optimization was done using wandb and 6 runs were done. I used bayesian optimization with hyperband early stops.
+Hyperparameter optimization was done using wandb and 103 runs were done. I used bayesian optimization with hyperband early stops.
  
 Hyperparameters used were:
 - Base Network
@@ -38,5 +38,5 @@ Hyperparameters used were:
 As an optimizer I used Adam and for loss I used CrossEntropyLoss.
  
 <p aling='center'>
-<img width="1000" height="400" src="readme_images/paralel_coords.png">
+<img width="1000" height="300" src="readme_images/paralel_coords.png">
 </p>
