@@ -5,10 +5,10 @@ command:
   - ${program}
   - ${args}
   - --use_wandb
-  - --gpu=-1
+  - --gpu=0
 method: bayes
 metric:
-  goal: maximize
+  goal: minimize
   name: val_loss
 parameters:
   aug_pad:
